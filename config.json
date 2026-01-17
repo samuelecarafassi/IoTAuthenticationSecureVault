@@ -1,0 +1,16 @@
+{
+  "vault": {
+    "num_keys": 16,
+    "key_size_bytes": 16
+  },
+  "challenge": {
+    "p": 4
+  },
+  "crypto": {
+    "symmetric_cipher": "AES",
+    "aes_mode": "GCM",
+    "hmac_hash": "SHA256",
+    "random_size_bytes": 16,
+    "session_key_size": 16
+  }
+}
