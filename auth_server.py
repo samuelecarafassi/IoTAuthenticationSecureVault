@@ -13,7 +13,7 @@ class IoTServer:
             self.sessions_data[device] = {}
 
     def receive_m1(self, device_id, session_id):
-        # only allowed devices can communicate 
+        # only allowed devices can communicate
         assert device_id in self.device_ids
 
         # avoid resetting an already existing connection
@@ -28,7 +28,7 @@ class IoTServer:
         r1 = os.urandom(self.cfg["crypto"]["random_size_bytes"])
 
         # store connection data
-        self.sessions_data[device_id][session_id] = {} 
+        self.sessions_data[device_id][session_id] = {}
         self.sessions_data[device_id][session_id]["C1"] = C1
         self.sessions_data[device_id][session_id]["r1"] = r1
 
@@ -45,7 +45,7 @@ class IoTServer:
         assert plaintext.startswith(r1)
 
         # compute challenge
-        C2_index = len(r1) + self.cfg["crypto"]["session_key_size"] 
+        C2_index = len(r1) + self.cfg["crypto"]["session_key_size"]
         C2 = list(plaintext[C2_index:C2_index+self.cfg["challenge"]["p"]])
         t1 = plaintext[len(r1):len(r1)+self.cfg["crypto"]["session_key_size"]]
         r2 = plaintext[-self.cfg["crypto"]["random_size_bytes"]:]

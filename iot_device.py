@@ -45,7 +45,7 @@ class IoTDevice:
 
         # verify challenge
         assert received_r2[:self.cfg["crypto"]["random_size_bytes"]] == self.session["r2"]
-        
+
         # compute session key
         t2 = received_r2[-self.cfg["crypto"]["session_key_size"]:]
 

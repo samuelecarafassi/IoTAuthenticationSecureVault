@@ -25,6 +25,7 @@ def setup_nodes(num_keys: int = None, key_size: int = None) -> IoTServer, IoTDev
     return server, device
 
 
+# TODO: Delete
 def run_single_test(num_keys, key_len, rounds):
     """Runs a targeted simulation to benchmark symmetric vs. HMAC overhead."""
     print(f"[*] Starting Single Benchmark Test...")
@@ -33,7 +34,7 @@ def run_single_test(num_keys, key_len, rounds):
     print(f"    - Total Rounds   : {rounds}")
 
     assert False, "Not implemented; to be deleted"
-    
+
     total_handshake_time = 0.0
 
     # TODO: Initialize your IoT Device and Server instances here
@@ -41,9 +42,9 @@ def run_single_test(num_keys, key_len, rounds):
     for current_round in range(1, rounds + 1):
         # --- 1. TIME THE ENCRYPTION HANDSHAKE ---
         start_time = time.perf_counter()
-        
+
         # TODO: Execute Messages 1 through 4 (XOR key derivation & AES encryption)
-        
+
         end_time = time.perf_counter()
         total_handshake_time += (end_time - start_time)
 
@@ -59,7 +60,7 @@ def run_single_test(num_keys, key_len, rounds):
     print("\n")
 
 
-def run_auth(server: IoTServer, device: IoTDevice, num_rounds):
+def run_general_auth(server: IoTServer, device: IoTDevice, num_rounds: int):
     if not num_rounds:
         num_rounds = 10_000
 
@@ -70,12 +71,12 @@ def run_auth(server: IoTServer, device: IoTDevice, num_rounds):
     device.receive_m4(m4)
 
 
-def default_run(num_keys, key_size, num_rounds):
+def default_run(num_keys: int, key_size: int, num_rounds: int):
     server, device = setup_nodes(num_keys, key_size)
 
     if not num_rounds:
         num_rounds = 10_000
-    return run_auth(server, device, num_rounds)
+    return run_general_auth(server, device, num_rounds)
 
 
 def run_sweep():
@@ -83,28 +84,28 @@ def run_sweep():
     assert False, "Not yet implemented"
 
     print(f"[*] Starting Full Performance Sweep (m: [...], n: [...], rounds: ...)")
-    
+
     # Testing matrix based on modern IoT constraints
     m_values = [8, 16, 32, 64, 128]
     n_values = [128, 256, 512]
-    sweep_rounds = 10000  
-    
+    sweep_rounds = 10000
+
     # Print CSV Header
     print("\n--- BEGIN CSV DATA ---")
     print("m_keys,n_bits,avg_handshake_ms,avg_hmac_ms")
-    
+
     for n in n_values:
         for m in m_values:
             # TODO: Initialize Device/Server with parameters 'm' and 'n'
             # TODO: Run the timing loop (similar to run_single_test)
-            
+
             # Placeholder variables for your actual timed results
-            avg_handshake_ms = 0.0  
-            avg_hmac_ms = 0.0       
-            
+            avg_handshake_ms = 0.0
+            avg_hmac_ms = 0.0
+
             # Print comma-separated values for easy copy-pasting into plotting tools
             print(f"{m},{n},{avg_handshake_ms:.4f},{avg_hmac_ms:.4f}")
-            
+
     print("--- END CSV DATA ---\n")
     print("[+] Full sweep complete. Data is ready for plotting.\n")
 
@@ -122,6 +123,7 @@ def print_help():
     print("  -m, --num-keys     Number of keys in the secure vault (m). Default: 16")
     print("  -n, --key-len      Size of each key in bits (n). Default: 128")
     print("  -r, --rounds       Total number of authentication handshakes to simulate. Default: 10000")
+
 
 def parse_auth():
     flags = ["-m", "--num-keys", "-n", "--key-len", "-r", "--rounds"]
