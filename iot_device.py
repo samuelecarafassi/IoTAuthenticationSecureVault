@@ -4,15 +4,16 @@ import numpy as np
 import os
 
 class IoTDevice:
-    def __init__(self, device_id, vault, config):
+    def __init__(self, device_id, vault, config, print_session_key = True):
         self.device_id = device_id
         self.vault = vault
         self.cfg = config
+        self._print_session_key = print_session_key
 
     def create_m1(self):
-        self.session ={}
-        self.session["session_id"] =os.urandom(8)
-        return {"device_id":self.device_id,"session_id":self.session["session_id"]}
+        self.session = {}
+        self.session["session_id"] = os.urandom(8)
+        return {"device_id": self.device_id, "session_id": self.session["session_id"]}
 
     def receive_m2(self, C1, r1):
         k1 = self.vault.derive_key(C1)
@@ -36,12 +37,12 @@ class IoTDevice:
         # prepare message
         payload = r1 + t1 + bytes(C2) + r2
         encrypted = aes_encrypt(k1, payload)
-        return {"device_id":self.device_id,"session_id":self.session["session_id"],"message":encrypted}
+        return {"device_id": self.device_id, "session_id": self.session["session_id"], "message": encrypted}
 
     def receive_m4(self, m4):
         # decrypt message
         k2 = self.vault.derive_key(self.session["C2"])
-        received_r2 = aes_decrypt(xor_bytes(k2,self.session["t1"]), m4)
+        received_r2 = aes_decrypt(xor_bytes(k2, self.session["t1"]), m4)
 
         # verify challenge
         assert received_r2[:self.cfg["crypto"]["random_size_bytes"]] == self.session["r2"]
@@ -49,5 +50,10 @@ class IoTDevice:
         # compute session key
         t2 = received_r2[-self.cfg["crypto"]["session_key_size"]:]
 
-        session_key = xor_bytes(self.session["t1"],t2)
-        print("Device session key:",session_key)
+        session_key = xor_bytes(self.session["t1"], t2)
+
+        if self._print_session_key:
+            print("Device session key:", session_key)
+
+        return session_key
+

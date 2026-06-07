@@ -3,11 +3,12 @@ from common.protocol_messages import random_challenge
 import os
 
 class IoTServer:
-    def __init__(self, device_ids, vault, config):
+    def __init__(self, device_ids, vault, config, print_session_key = True):
         self.device_ids = device_ids
         self.vault = vault
         self.cfg = config
         self.sessions_data = {}
+        self._print_session_key = print_session_key
 
         for device in device_ids:
             self.sessions_data[device] = {}
@@ -32,7 +33,7 @@ class IoTServer:
         self.sessions_data[device_id][session_id]["C1"] = C1
         self.sessions_data[device_id][session_id]["r1"] = r1
 
-        return {"C1":C1, "r1":r1}
+        return {"C1": C1, "r1": r1}
 
     def receive_m3(self, m3):
 
@@ -52,7 +53,9 @@ class IoTServer:
         t2 = os.urandom(self.cfg["crypto"]["session_key_size"])
         k2 = self.vault.derive_key(C2)
 
-        session_key = xor_bytes(t1,t2)
-        print(f"Server session key for device {m3['device_id']}: {session_key}")
+        session_key = xor_bytes(t1, t2)
+        if self._print_session_key:
+            print(f"Server session key for device {m3['device_id']}: {session_key}")
 
-        return aes_encrypt(xor_bytes(k2,t1), r2 + t2)
+        return aes_encrypt(xor_bytes(k2, t1), r2 + t2), session_key
+
