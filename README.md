@@ -17,7 +17,7 @@ IoTAuthenticationSecureVault is a project for a Cyber-Physical Systems and IoT S
 ## How to use
 To run the full data-gathering.
 > This will create two files in the current directory (crypto_scaling.csv and payload_scaling.csv).
-> It will overwrite any possible file with the same name in the directory.
+> It will overwrite all the files with either name.
 ```python
 python3 secureVault.py sweep
 ```
