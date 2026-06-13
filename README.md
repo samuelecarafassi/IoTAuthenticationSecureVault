@@ -12,9 +12,17 @@ IoTAuthenticationSecureVault is a project for a Cyber-Physical Systems and IoT S
 ## Implementation limitations
 1. **Absence of authentication timeouts:** No authentication timeout mechanism was implemented in the simulation to allow for uninterrupted performance benchmarking. In a real-world deployment, timeouts and rate-limiting are strictly required to mitigate connection flooding.
 2. **Hardware Abstraction:** Unlike the original Arduino-based implementation, this simulation does not measure physical energy consumption or execution time under strict embedded hardware constraints. Performance metrics are relative to algorithmic complexity.
-3. **Faked network delays:** Being this simulation hosted on a single device, to measure the protocol's overhead what we thought made sense the most was to add some delays in between the message exchange, so we emulated the real-like delays due to the packets Round Trip Time (RTT) on the network.
+3. **Cryptographic Ambiguity in Vault Updates:** The original paper states that the secure vault is updated via an HMAC where the key is the “data exchanged between the server and the IoT device”. However, the authors fail to specify the exact composition of this data stream (e.g., whether it includes protocol headers, plaintext nonces, ciphertexts, or concatenated payloads). Due to this lack of cryptographic reproducibility, our simulation must explicitly define the HMAC payload as a strict concatenation of the session’s handshake entropy (r1||t1||r2||t2) combined with any appended application data.
 
 ## How to use
+To run the full data-gathering.
+> This will create two files in the current directory (crypto_scaling.csv and payload_scaling.csv).
+> It will overwrite any possible file with the same name in the directory.
+```python
+python3 secureVault.py sweep
+```
+
+To display the help message.
 ```python
 python3 secureVault.py
 ```
