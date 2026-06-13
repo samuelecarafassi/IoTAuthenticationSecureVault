@@ -1,4 +1,4 @@
-from common.crypto import aes_encrypt, aes_decrypt, xor_bytes
+from common.crypto import aes_encrypt, aes_decrypt, xor_bytes, hmac_digest
 from common.protocol_messages import random_challenge
 import numpy as np
 import os
@@ -16,6 +16,8 @@ class IoTDevice:
         return {"device_id": self.device_id, "session_id": self.session["session_id"]}
 
     def receive_m2(self, C1, r1):
+        self.session["r1"] = r1
+
         k1 = self.vault.derive_key(C1)
 
         # generate challenge for the server
@@ -50,6 +52,8 @@ class IoTDevice:
         # compute session key
         t2 = received_r2[-self.cfg["crypto"]["session_key_size"]:]
 
+        self.session["t2"] = t2
+
         session_key = xor_bytes(self.session["t1"], t2)
 
         if self._print_session_key:
@@ -57,3 +61,8 @@ class IoTDevice:
 
         return session_key
 
+    def finalize_session(self, application_data=b""):
+        payload = self.session["r1"] + self.session["t1"] + self.session["r2"] + self.session["t2"] + application_data
+        vault_key = b"".join(self.vault.keys)
+        hmac_value = hmac_digest(vault_key, payload)
+        self.vault.update(hmac_value)

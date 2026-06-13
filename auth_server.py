@@ -1,4 +1,4 @@
-from common.crypto import aes_decrypt, aes_encrypt, xor_bytes
+from common.crypto import aes_decrypt, aes_encrypt, xor_bytes, hmac_digest
 from common.protocol_messages import random_challenge
 import os
 
@@ -51,6 +51,12 @@ class IoTServer:
         t1 = plaintext[len(r1):len(r1)+self.cfg["crypto"]["session_key_size"]]
         r2 = plaintext[-self.cfg["crypto"]["random_size_bytes"]:]
         t2 = os.urandom(self.cfg["crypto"]["session_key_size"])
+
+        session_data = self.sessions_data[m3["device_id"]][m3["session_id"]]
+        session_data["t1"] = t1
+        session_data["r2"] = r2
+        session_data["t2"] = t2
+
         k2 = self.vault.derive_key(C2)
 
         session_key = xor_bytes(t1, t2)
@@ -58,4 +64,11 @@ class IoTServer:
             print(f"Server session key for device {m3['device_id']}: {session_key}")
 
         return aes_encrypt(xor_bytes(k2, t1), r2 + t2), session_key
+
+    def finalize_session(self, device_id, session_id, application_data=b""):
+        session = self.sessions_data[device_id][session_id]
+        payload = session["r1"] + session["t1"] + session["r2"] + session["t2"] + application_data
+        vault_key = b"".join(self.vault.keys)
+        hmac_value = hmac_digest(vault_key, payload)
+        self.vault.update(hmac_value)
 
